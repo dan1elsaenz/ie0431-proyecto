@@ -40,13 +40,17 @@ Este presenta un _fit_ del $$98.07$$%.
 
 ## Mínimos cuadrados
 
-Con este método se obtiene un modelo del proceso discreto.
-Se seleccionó un modelo de tercer orden (tres polos y tres ceros).
-La función de transferencia obtenida es:
+Con este método se obtiene un modelo del proceso discreto. Se seleccionó un
+modelo de tercer orden (tres polos y tres ceros). La función de transferencia
+obtenida es:
 
-$$P(s) = \frac{0.004304 z^{-1} - 0.0036 z^{-2} + 0.02427 z^{-3}}{1 - 0.5794 z^{-1} - 0.5366 z^{-2} + 0.1429 z^{-3}}$$
+$$
+P(s) = \frac{0.004304 z^{-1} - 0.0036 z^{-2} + 0.02427 z^{-3}}{1 - 0.5794
+z^{-1} - 0.5366 z^{-2} + 0.1429 z^{-3}}
+$$
 
 Este presenta un _fit_ del $$91.9963$$%.
 
 > [!NOTE]
-> Consultar si la complejidad de este modelo supera la indicada en el enunciado (**de orden reducido**).
+> Consultar si la complejidad de este modelo supera la indicada en el
+> enunciado (**de orden reducido**).
