@@ -25,16 +25,16 @@ proceso respecto a los datos proporcionados, por lo que fueron descartados.
 
 - **Propuesta 1:** Primer orden más tiempo muerto
 
-$$P(s) = \frac{K_p}{1 + T_{p1}s} e^{-T_d s}$$
+$$P(s) = \frac{K}{1 + T_{p1}s} e^{-L s}$$
 
-con $$K_p = 0.92044$$, $$T_{p1} = 1.0507$$ s, $$T_d = 0.13711$$ s.
+con $$K = 0.92044$$, $$T_{p1} = 1.0507$$ s, $$L = 0.13711$$ s.
 Este presenta un _fit_ del $$98.06$$%.
 
 - **Propuesta 2:** Segundo orden más tiempo muerto con polos reales.
 
-$$P(s) = \frac{K_p}{(1 + T_{p1}s)(1 + T_{p2}s)} e^{-T_d s}$$
+$$P(s) = \frac{K}{(1 + T_{p1}s)(1 + T_{p2}s)} e^{-L s}$$
 
-con $$K_p = 0.92038$$, $$T_{p1} = 1.0479$$ s, $$T_{p2} = 0.049018$$ s, $$T_d =
+con $$K = 0.92038$$, $$T_{p1} = 1.0479$$ s, $$T_{p2} = 0.049018$$ s, $$L =
 0.08965$$ s.
 Este presenta un _fit_ del $$98.07$$%.
 
