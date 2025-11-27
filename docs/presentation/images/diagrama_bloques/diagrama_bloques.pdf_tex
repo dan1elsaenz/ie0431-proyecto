@@ -1,0 +1,84 @@
+%% Creator: Inkscape 1.4.2 (ebf0e940, 2025-05-08), www.inkscape.org
+%% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
+%% Accompanies image file 'diagrama_bloques.pdf' (pdf, eps, ps)
+%%
+%% To include the image in your LaTeX document, write
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics{<filename>.pdf}
+%% To scale the image, write
+%%   \def\svgwidth{<desired width>}
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics[width=<desired width>]{<filename>.pdf}
+%%
+%% Images with a different path to the parent latex file can
+%% be accessed with the `import' package (which may need to be
+%% installed) using
+%%   \usepackage{import}
+%% in the preamble, and then including the image with
+%%   \import{<path to file>}{<filename>.pdf_tex}
+%% Alternatively, one can specify
+%%   \graphicspath{{<path to file>/}}
+%% 
+%% For more information, please see info/svg-inkscape on CTAN:
+%%   http://tug.ctan.org/tex-archive/info/svg-inkscape
+%%
+\begingroup%
+  \makeatletter%
+  \providecommand\color[2][]{%
+    \errmessage{(Inkscape) Color is used for the text in Inkscape, but the package 'color.sty' is not loaded}%
+    \renewcommand\color[2][]{}%
+  }%
+  \providecommand\transparent[1]{%
+    \errmessage{(Inkscape) Transparency is used (non-zero) for the text in Inkscape, but the package 'transparent.sty' is not loaded}%
+    \renewcommand\transparent[1]{}%
+  }%
+  \providecommand\rotatebox[2]{#2}%
+  \newcommand*\fsize{\dimexpr\f@size pt\relax}%
+  \newcommand*\lineheight[1]{\fontsize{\fsize}{#1\fsize}\selectfont}%
+  \ifx\svgwidth\undefined%
+    \setlength{\unitlength}{623.56806718bp}%
+    \ifx\svgscale\undefined%
+      \relax%
+    \else%
+      \setlength{\unitlength}{\unitlength * \real{\svgscale}}%
+    \fi%
+  \else%
+    \setlength{\unitlength}{\svgwidth}%
+  \fi%
+  \global\let\svgwidth\undefined%
+  \global\let\svgscale\undefined%
+  \makeatother%
+  \begin{picture}(1,0.25917237)%
+    \lineheight{1}%
+    \setlength\tabcolsep{0pt}%
+    \put(0,0){\includegraphics[width=\unitlength,page=1]{diagrama_bloques.pdf}}%
+    \put(0.01875471,0.18572845){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$r(s)$\end{tabular}}}}%
+    \put(0.09065619,0.18443169){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$+$\end{tabular}}}}%
+    \put(0.16979408,0.18572846){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$e(s)$\end{tabular}}}}%
+    \put(0.38955555,0.18572846){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$u(s)$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=2]{diagrama_bloques.pdf}}%
+    \put(0.60486211,0.18572846){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$m(s)$\end{tabular}}}}%
+    \put(0.9298387,0.18609849){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$y(s)$\end{tabular}}}}%
+    \put(0.10227101,0.13578362){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$-$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=3]{diagrama_bloques.pdf}}%
+    \put(0.28035064,0.17529843){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$C(s)$\\Arduino\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=4]{diagrama_bloques.pdf}}%
+    \put(0.49729525,0.17679013){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$A(s)$\\Motor y aspas\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=5]{diagrama_bloques.pdf}}%
+    \put(0.63019834,0.04540097){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$G_S(s)$\\Tubo Venturi\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=6]{diagrama_bloques.pdf}}%
+    \put(0.41265376,0.04574176){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$G_{\text{DAQ}}(s)$\\Tarjeta NI\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=7]{diagrama_bloques.pdf}}%
+    \put(0.71625935,0.1768332){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$P(s)$\\Flujo de aire\end{tabular}}}}%
+    \put(0.90755719,0.24703181){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$d(s)$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=8]{diagrama_bloques.pdf}}%
+    \put(0.85583867,0.18088025){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$+$\end{tabular}}}}%
+    \put(0.86654058,0.19904476){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$+$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=9]{diagrama_bloques.pdf}}%
+    \put(0.16095154,0.0500474){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$y(s)$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=10]{diagrama_bloques.pdf}}%
+    \put(0.50151072,0.057877){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$y'(s)$\end{tabular}}}}%
+  \end{picture}%
+\endgroup%

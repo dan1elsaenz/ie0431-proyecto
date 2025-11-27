@@ -1,0 +1,643 @@
+
+%================================================
+%Aplicacion
+%================================================
+\begin{frame}{Descripción de la aplicación seleccionada}
+  \begin{itemize}
+    \item Cabinas de bioseguridad: manipulación de sustancias químicas peligrosas.
+    \item Es fundamental extraer gases al exterior para proteger: \cite{cabina}
+    \begin{itemize}
+      \item Al operador.
+      \item Al resto del laboratorio.
+    \end{itemize}
+    \item El flujo de aire debe mantenerse en un rango seguro, aún con perturbaciones.
+  \end{itemize}
+  \vfill
+  \begin{figure}[H]
+      \centering
+      \includegraphics[width=0.25\linewidth]{images/internet/camara.png}
+      \caption*{Figura 1: Cabina de bioseguridad.}
+      \label{fig:cabian}
+  \end{figure}
+
+\end{frame}
+
+
+%================================================
+%Descripcion sistema
+%================================================
+
+
+\begin{frame}{Descripción del sistema}
+	\begin{figure}[H]
+		\centering
+		\resizebox{1\columnwidth}{!}{
+			\def\svgwidth{1.3\columnwidth}
+			\import{images/diagrama_bloques}{diagrama_bloques.pdf_tex}
+		}
+		\caption*{Figura 2: Diagrama de bloques del sistema.}
+		\label{fig:bloques}
+	\end{figure}
+	
+\end{frame}
+%================================================
+%Identificacion de la planta
+%================================================
+\begin{frame}{Análisis del proceso}
+  \begin{itemize}
+    \item Modo de operación: control regulatorio con referencia constante.
+    \item Rango de operación: 20\%–60\%.
+    \item Perturbaciones típicas:
+    \begin{itemize}
+      \item Apertura/cierre de la compuerta del ducto.
+      \item Presencia de manos/objetos del operador.
+      \item Corrientes de aire externas.
+    \end{itemize}
+    \item El aire introduce no linealidades: cambios de densidad, presión y régimen de flujo \cite{no_linear}.
+     \item Objetivo: Obtener el modelo de mejor que describa la dinámica.
+    \item Se utilizaron cuatro métodos distintos de identificación de procesos.
+  \end{itemize}
+
+\end{frame}
+
+
+%----------------------------------------
+
+\begin{frame}{Modelos del proceso}
+  \begin{columns}[t] 
+    \column{0.48\textwidth}
+    \textbf{Modelo SIT}
+    \vspace{0.2cm}
+    \begin{itemize}
+      \item De primer orden más tiempo muerto.
+    \end{itemize}
+    \[
+      P_{\text{SIT}}(s) = \frac{0.9204\,e^{-0.1371 s}}{1.0507 s + 1}
+    \]
+
+    %---- Columna 2: 123c ----
+    \column{0.48\textwidth}
+    \textbf{Modelo Alfaro 123c} \cite{alfaro2006123c}
+    \vspace{0.2cm}
+    \begin{itemize}
+      \item Usa tiempos al 25\% y 75\% del valor final de la respuesta.
+    \end{itemize}
+    \[
+      P_{123c}(s) = \frac{0.9215\,e^{-0.1923 s}}{0.9887 s + 1}
+    \]
+
+  \end{columns}
+\end{frame}
+
+
+\begin{frame}{Modelos del proceso}
+  \begin{columns}[t]
+    %---- Columna 1: Ho ----
+    \column{0.48\textwidth}
+    \textbf{Modelo de Ho et al.} \cite{Ho1995}
+    \vspace{0.2cm}
+    \begin{itemize}
+      \item Usa tiempos al 35\% y 85\% del valor final de la respuesta.
+    \end{itemize}
+    \[
+      P_{\text{Ho}}(s) = \frac{0.9215\,e^{-0.1484 s}}{1.0653 s + 1}
+    \]
+
+    %---- Columna 2: Mínimos cuadrados ----
+    \column{0.48\textwidth}
+    \textbf{Modelo por mínimos cuadrados}
+    \vspace{0.2cm}
+    \begin{itemize}
+      \item Obtenido mediante la matriz de regresores
+    \end{itemize}
+    \[
+      P_{\text{LS}}(z) = \frac{0.01895\,z^{-1}}{1 - 0.9796\,z^{-1}}
+    \]
+
+  \end{columns}
+\end{frame}
+
+
+%----------------------------------------
+\begin{frame}{Comparación de modelos de la planta}
+  \begin{columns}[t]
+
+    \column{0.52\textwidth}
+    \vspace{1cm}
+    \textbf{Métrica de comparación: IAE}
+    \begin{itemize}
+      \item A menor IAE, mejor ajuste del modelo a los datos experimentales.
+      \item Se selecciona el modelo obtenido con \texttt{System Identification Toolbox}.
+    \end{itemize}
+
+    \vspace{0.2cm}
+    \centering
+    \scriptsize
+    \begin{tabular}{l|c}
+      \hline
+      \textbf{Modelo} & \textbf{IAE} \\
+      \hline
+      SIT      & 4.17  \\
+      123c             & 4.98  \\
+      Ho et al.        & 4.41  \\
+      Mínimos cuadrados & 7.62 \\
+      \hline
+    \end{tabular}
+
+    %==== Columna derecha: figura ====
+    \column{0.46\textwidth}
+
+    \begin{figure}[H]
+    \centering
+    \resizebox{1\columnwidth}{!}{
+    \def\svgwidth{1.5\columnwidth}
+    \import{images/identificacion_modelos}{identificacion_modelos.pdf_tex}
+    }
+    \caption*{Figura 3: Respuesta dinámica de los modelos obtenidos.}
+    \label{fig:identificacion_experimental}
+\end{figure}
+  \end{columns}
+\end{frame}
+
+
+%================================================
+%Requerimientos del controlador
+%================================================
+
+\begin{frame}{Descripción del algoritmo de control}
+	Se requiere una \textbf{acción de control inversa ($+$)}.
+
+	Para el diseño del algoritmo de control $C(s)$ del sistema de control realimentado, se plantearon las siguientes especificaciones:
+	\begin{itemize}
+		\item Error permanente nulo ante cambios tipo escalón en la perturbación.
+		\item Sensibilidad máxima $M_s < 1.25$ para un diseño robusto y estable, debido a las no-linealidades del proceso.
+		\item Esfuerzo de control suave, con transiciones graduales que minimizan el desgaste mecánico del actuador.
+	\end{itemize}
+\end{frame}
+
+
+	
+	
+%================================================
+%Algoritmos de control
+%================================================
+\begin{frame}{Algoritmos de control continuos}
+	\begin{columns}[t] 
+		\column{0.48\textwidth}
+		\textbf{Método: RoPe} \cite{Alfaro2011RoPe}
+		\vspace{0.2cm}
+		\begin{itemize}
+			\item Robust-performance.
+			\item Regla de sintonización de dos grados de libertad para un PID-estándar.
+		\end{itemize}
+		\vspace{0.7cm}
+		
+	\[
+		\begin{gathered}
+			K_p = \frac{a_0 + a_1 \tau_o}{K(a_2 + \tau_o)}, \\
+			T_i = T\left(b_0 + b_1 \tau_o^{b_2}\right), \\
+			T_d = T\left(c_0 + c_1 \tau_o^{c_2}\right). \\
+		\end{gathered}
+	\]
+		
+		%---- Columna 2: 123c ----
+		\column{0.48\textwidth}
+		\vspace{0cm}
+		\begin{itemize}
+			\item Para el diseño, se consideró un $M_s = 1.2$, con el fin de garantizar la robustez necesaria, así como un tiempo muerto normalizado $\tau_0 = 0.1305$.
+
+		\end{itemize}
+		\vspace{0.7cm}
+		\[
+			\begin{split}
+				K_p &= 1.6825, \\
+				T_i &= \SI{0.4279}{\second}, \\
+				T_d &= \SI{0.0757}{\second}. \\
+			\end{split}
+		\]
+		
+	\end{columns}
+\end{frame}
+
+%-------------------------------------------
+
+\begin{frame}{Algoritmos de control continuos}
+	\begin{columns}[t] 
+		\column{0.48\textwidth}
+		\textbf{Método: Síntesis Analítica}
+		\vspace{0.2cm}
+		\begin{itemize}
+			\item Algoritmo de control PI de dos grados de libertad.
+			\item 	El parámetro $\tau_c$ correspondiente a la constante de tiempo deseada, que debe respetar las restricciones:
+		\end{itemize}
+		\vspace{0.1cm}
+		
+		\[
+			\begin{gathered}
+				0.7327 \leq \tau_c \leq 1.5391. \\
+			\end{gathered}
+		\]
+		
+		%---- Columna 2: 123c ----
+		\column{0.48\textwidth}
+		\vspace{0cm}
+		\begin{itemize}
+			\item Se seleccionó $\tau_c = 0.8$ s y  $\tau_o = 0.1305$ para el diseño, con el fin de garantizar un diseño robusto.
+			
+		\end{itemize}
+		\vspace{0.7cm}
+		\[
+	   	 \begin{gathered}
+			K_p = \frac{\tau_c (2 - \tau_c) + \tau_0}{K(\tau_c + \tau_0)^2} =1.3684 , \\
+			T_i = T\frac{\tau_c (2 - \tau_c) + \tau_0}{1 + \tau_0}= \SI{1.0135}{\second}, \\
+			T_d = \SI{0}{\second}.
+			\end{gathered}
+		\]
+		
+	\end{columns}
+\end{frame}
+
+%-------------------------------------------
+
+\begin{frame}{Algoritmos de control continuos}
+	\begin{columns}[t] 
+		\column{0.48\textwidth}
+		\textbf{Método: Brambilla} \cite{brambilla1989}
+		\vspace{0.2cm}
+		\begin{itemize}
+			\item Este método tiene la restricción de $0.1 \leq \tau_0 \leq 10$
+			\item Además $\lambda$ corresponde a un parámetro en el rango de $0.1T \leq \lambda \leq 0.5T$.
+			\item	Como se requiere una alta robustez, se seleccionó el límite superior $\lambda = 0.5T = 0.5253$ s.
+
+		\end{itemize}
+
+		
+		%---- Columna 2: 123c ----
+		\column{0.48\textwidth}
+		\vspace{0.2 cm}
+
+		
+			\[
+			\begin{split}
+				K_p =  \frac{T + 0.5L}{K (\lambda + L)} = 1.8356, \\
+				T_i = T + 0.5L= \SI{1.1193}{\second}, \\
+				T_d = \frac{TL}{2T + L}= \SI{0.0644}{\second}.
+			\end{split}
+			\]
+		
+	\end{columns}
+\end{frame}
+
+%-------------------------------------------
+
+
+% \begin{frame}{Algoritmo de control discreto}
+% 	\footnotesize
+% 	\begin{columns}[T,totalwidth=\textwidth]
+% 		\begin{column}{0.52\textwidth}
+% 			\begin{itemize}
+% 				\item Dado que el método esta enfocado a servocontrol, se definió una respuesta sin oscilaciones y un tiempo de asentamiento al $2\%$ menor a \SI{2}{\second}.
+
+% 			\end{itemize}
+							
+% 			\[
+% 			\begin{split}
+% 				C(z) &= \frac{\left(K_p + K_i\right)z - K_p}{z-1}, \\
+% 				&= \frac{K\left(z - a\right)}{z-1},
+% 			\end{split}
+% 			\]
+				
+% 	\begin{itemize}
+% 		\item La primera expresión corresponde a la forma PI-paralelo del controlador 
+% 		\item La segunda se va a utilizar para el diseño en \texttt{Sisotool}.
+% 	\end{itemize}
+% 			\[
+% 			K_p = 10.776,\quad
+% 			K_i = 0.224~\si{\second^{-1}}
+% 			\]
+			
+% 		\end{column}
+% 		\begin{column}{0.48\textwidth}
+% 		\vspace{0.5 cm}
+			
+% 			\begin{figure}[H]
+% 				\centering
+% 				\resizebox{0.9\columnwidth}{!}{
+% 					\def\svgwidth{1.5\columnwidth}
+% 					\import{images/lgr_discreto}{lgr.pdf_tex}
+% 				}
+% 				\caption*{Figura 4: LGR discreto.}
+% 				\label{fig:LGR discreto}
+% 			\end{figure}
+% 		\end{column}
+% 	\end{columns}
+% \end{frame}
+
+\begin{frame}{Controlador PI con LGR Discreto}
+
+\textbf{Requerimientos:} polos dentro del círculo unitario, sin oscilaciones, 
+$t_a(2\%) < \SI{1}{\second}$, $M_s < 1.25$.
+
+\begin{equation*}
+	C(z)=\frac{K(z-a)}{z-1}, \qquad a=-0.9796, \qquad P_{\text{LS}}(z) = \frac{0.01895\,z^{-1}}{1 - 0.9796\,z^{-1}}
+\end{equation*}
+
+\begin{columns}[T]
+\column{0.48\linewidth}
+\centering
+\resizebox{0.9\linewidth}{!}{
+    \def\svgwidth{1.3\columnwidth}
+    \import{images/lgr_discreto}{lgr.pdf_tex}
+}
+\column{0.48\linewidth}
+\centering
+\resizebox{0.8\linewidth}{!}{
+    \def\svgwidth{1.4\columnwidth}
+    \import{images/lgr_discreto}{salida_lgr.pdf_tex}
+}
+\end{columns}
+
+
+\[
+\text{Parámetros finales:} \quad K_p=5.3878,\quad K_i=\SI{0.1122}{\second^{-1}}.
+\]
+
+\end{frame}
+
+
+%================================================
+%Simulaciones
+%================================================
+\begin{frame}{Simulación de los algoritmos de control}
+	\footnotesize
+	\begin{columns}[T,totalwidth=\textwidth]
+		\begin{column}{0.49\textwidth}
+
+			\begin{figure}[H]
+	\centering
+	\resizebox{0.9\columnwidth}{!}{
+		\def\svgwidth{1.2\columnwidth}
+		\import{images/respuestas}{y_reg.pdf_tex}
+	}
+	\caption*{Figura 5: Simulación temporal de la entrada y salidas de los algoritmos en control regulatorio.}
+	\label{fig:y}
+			\end{figure}			
+		\end{column}
+		\begin{column}{0.49\textwidth}
+			\vspace{0 cm}
+			
+			\begin{figure}[H]
+				\centering
+				\resizebox{0.9\columnwidth}{!}{
+					\def\svgwidth{1.3\columnwidth}
+					\import{images/respuestas}{u_reg.pdf_tex}
+				}
+				\caption*{Figura 6: Simulación temporal de la entrada y señal de control de los algoritmos en control regulatorio.}
+				\label{fig:u}
+			\end{figure}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+
+
+\begin{frame}{Indicadores de desempeño obtenidos}
+	\begin{table}[htbp]
+		\centering
+		\caption*{Cuadro 1: Indicadores de desempeño en control regulatorio para los algoritmos considerados.}
+		\begin{tabular}{|c|c|c|c|c|}
+			\hline
+			\textbf{Indicador} & \textbf{RoPe} & \textbf{Sínt. Analítica} & \textbf{Brambilla} & \textbf{LGR discreto} \\
+			\hline
+$IAE_d$         & 3.3032 & 7.4046 & 6.0944 & 2.3592 \\
+\hline
+$TV_{u,d}$      & 13.9822 & 10.0133 & 10.0000 & 10.0000 \\
+\hline
+$U_{max,d}$     & 11.7330 & 10.0068 & 10.0000 & 10.0000 \\
+\hline
+$E_{max,d}$     & 2.5446 & 3.2679 & 2.7632 & 1.2489 \\
+\hline
+$t_{E_{max,d}}$ (s) & 0.7532 & 0.9853 & 0.9148 & 0.5110 \\
+\hline
+$e_{perm,d}$    & 0.0000 & 0.0000 & 0.0000 & 0.0000 \\
+			\hline
+		\end{tabular}
+		\label{tab:indicadores_regulatorio_sim}
+	\end{table}
+\end{frame}
+
+
+\begin{frame}{Sensibilidad máxima $M_s$}
+	\footnotesize
+	\begin{columns}[T,totalwidth=\textwidth]
+		
+		% Columna izquierda: figura
+		\begin{column}{0.52\textwidth}
+			\begin{figure}[H] \centering \resizebox{0.9\columnwidth}{!}{ \def\svgwidth{1.15\columnwidth} \import{images/m_s}{m_s.pdf_tex} } \caption*{Figura 7: Sensibilidades máximas obtenidas.} \label{fig:ms} \end{figure}
+		\end{column}
+		
+		% Columna derecha: tabla
+		\begin{column}{0.48\textwidth}
+			\vspace{1.5cm}
+			
+			{\scriptsize Cuadro 2: Sensibilidad máxima $M_s$ obtenida en algoritmos de control considerados..}
+			
+			\vspace{0.2cm}
+			
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\textbf{Algoritmo} & \textbf{Sensibilidad máxima} \\
+\hline
+RoPe            & 1.222 \\
+\hline
+Sínt. Analítica & 1.158 \\
+\hline
+Brambilla       & 1.170 \\
+\hline
+Discreto        & 1.055 \\
+\hline
+\end{tabular}
+			
+		\end{column}
+	\end{columns}
+\end{frame}
+
+%===================================
+%Respuestas reales
+%===================================
+\begin{frame}{Resultados experimentales - RoPe}
+	\footnotesize
+	\begin{columns}[T,totalwidth=\textwidth]
+		
+		% Columna izquierda: figura
+		\begin{column}{0.52\textwidth}
+			\begin{figure}[H] \centering \resizebox{0.9\columnwidth}{!}{ \def\svgwidth{1.15\columnwidth} \import{images/exp}{exp_rope.pdf_tex} } \caption*{Figura 8: Respuesta temporal del sistema real obtenidos con el controlador PID de RoPe.} \label{fig:exp-rope} \end{figure}
+		\end{column}
+		
+		% Columna derecha: tabla
+		\begin{column}{0.48\textwidth}
+			\vspace{1.5cm}
+			
+			{\scriptsize Cuadro 3: Indicadores de desempeño en control regulatorio .}
+			
+			\vspace{0.2cm}
+			
+			\begin{tabular}{|c|c|c|c|}
+				\hline
+				\textbf{Indicador} & \textbf{Sim.} & \textbf{Pert. 1} & \textbf{Pert. 2} \\
+				\hline
+    $IAE_d$     & 3.3032  & 5.4967 & 6.9187 \\
+    \hline
+    $E_{max,d}$ & 2.5446  & 4.6384 & 6.0773 \\
+    \hline
+    $TV_{u,d}$  & 13.9822 & 16.4995 & 19.7649 \\
+    \hline
+    $U_{max,d}$ & 11.7330 & 11.7461 & 12.8780 \\
+				\hline
+			\end{tabular}
+
+			\begin{itemize}
+				\item Menor robustez
+				\item Mejor desempeño
+				\item Peor esfuerzo de control
+			\end{itemize}
+			
+		\end{column}
+	\end{columns}
+\end{frame}
+
+%------------------------------
+
+\begin{frame}{Resultados experimentales - Síntesis analitica}
+	\footnotesize
+	\begin{columns}[T,totalwidth=\textwidth]
+		
+		% Columna izquierda: figura
+		\begin{column}{0.52\textwidth}
+			\begin{figure}[H] \centering \resizebox{0.9\columnwidth}{!}{ \def\svgwidth{1.15\columnwidth} \import{images/exp}{exp_sintesis.pdf_tex} } \caption*{Figura 9: Respuesta temporal del sistema real obtenidos con el controlador PI de síntesis analítica.} \label{fig:exp-sisntesis} \end{figure}
+		\end{column}
+		
+		% Columna derecha: tabla
+		\begin{column}{0.48\textwidth}
+			\vspace{1.5cm}
+			
+		\centering
+		{\scriptsize Cuadro 4: Indicadores de desempeño en control regulatorio.}
+		
+		\vspace{0.2cm}
+		
+		\begin{tabular}{|c|c|c|c|}
+			\hline
+			\textbf{Indicador} & \textbf{Sim.} & \textbf{Pert. 1} & \textbf{Pert. 2} \\
+			\hline
+    $IAE_d$     & 7.4046  & 9.0790 & 9.0957 \\
+    \hline
+    $E_{max,d}$ & 3.2679  & 5.4237 & 6.2616 \\
+    \hline
+    $TV_{u,d}$  & 10.0133 & 10.7035 & 12.1920 \\
+    \hline
+    $U_{max,d}$ & 10.0068 & 9.9521 & 10.5282 \\
+			\hline
+		\end{tabular}
+
+		\begin{itemize}
+			\item Mayor robustez
+			\item Mejor esfuerzo de control
+			\item Peor desempeño (pero no es una especificación diseño)
+		\end{itemize}
+			
+		\end{column}
+	\end{columns}
+\end{frame}
+
+%------------------------------
+
+\begin{frame}{Resultados experimentales - Brambilla}
+	\footnotesize
+	\begin{columns}[T,totalwidth=\textwidth]
+		
+		% Columna izquierda: figura
+		\begin{column}{0.52\textwidth}
+			\begin{figure}[H] \centering \resizebox{0.9\columnwidth}{!}{ \def\svgwidth{1.15\columnwidth} \import{images/exp}{exp_brambilla.pdf_tex} } \caption*{Figura 10: Respuesta temporal del sistema real obtenidos con el controlador PID de Brambilla.} \label{fig:exp-brambilla} \end{figure}
+		\end{column}
+		
+		% Columna derecha: tabla
+		\begin{column}{0.48\textwidth}
+			\vspace{1.5cm}
+			
+			
+			\centering
+			{\scriptsize  Cuadro 5: Indicadores de desempeño en control regulatorio .}
+			
+			\vspace{0.2cm}
+			
+				\begin{tabular}{|c|c|c|c|}
+					\hline
+					\textbf{Indicador} & \textbf{Sim.} & \textbf{Pert. 1} & \textbf{Pert. 2} \\
+					\hline
+    $IAE_d$     & 6.0944  & 7.7196 & 8.2788 \\
+    \hline
+    $E_{max,d}$ & 2.7632  & 5.2706 & 6.4657 \\
+    \hline
+    $TV_{u,d}$  & 10.0000 & 11.7785 & 13.7487 \\
+    \hline
+    $U_{max,d}$ & 10.0000 & 9.8747 & 11.1554 \\
+					\hline
+				\end{tabular}
+
+			\begin{itemize}
+				\item Robustez intermedia
+				\item Buen esfuerzo de control
+				\item $IAE$ intermedio
+			\end{itemize}
+			
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Selección del mejor controlador}
+	\small
+	\begin{itemize}
+		\item \textbf{Todos cumplen:}
+		\begin{itemize}
+			\item Error permanente nulo.
+			\item Robustez aceptable: $M_s < 1.25$.
+		\end{itemize}
+		
+		\item \textbf{RoPe}
+		\begin{itemize}
+			\item Mejor $IAE$, pero menor robustez.
+			\item Señal de control muy agresiva
+			(mayor $U_{max}$ y $TV_{u,d}$).
+		\end{itemize}
+		
+		\item \textbf{Brambilla}
+		\begin{itemize}
+			\item Desempeño intermedio.
+			\item Esfuerzo de control más suave que RoPe.
+		\end{itemize}
+		
+		\item \textbf{Síntesis analítica (seleccionado)}
+		\begin{itemize}
+			\item Más robusto ($M_s = 1.158$).
+			\item Menor esfuerzo de control
+			(bajo $U_{max}$ y $TV_{u,d}$).
+			\item Comportamiento consistente ante perturbaciones.
+			\item Sacrifica un poco de $IAE$ a cambio de robustez
+			y cuidado del actuador.
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+% \begin{frame}{Conclusiones}
+% 	\small
+% 	\begin{itemize}
+% 		\item A partir de los datos experimentales en el rango de operación del 20\% al 60\%, se aplicaron distintos métodos de identificación en lazo abierto para ajustar modelos dinámicos del proceso real.
+		
+% 		\item Los modelos obtenidos se compararon mediante el índice de desempeño IAE, con el fin de seleccionar el modelo que mejor representara la dinámica observada experimentalmente.
+		
+% 		\item El mejor modelo encontrado fue el generado con \texttt{System Identification Toolbox}, correspondiente a un sistema de primer orden más tiempo muerto con polos reales, el cual presentó el menor IAE y la mejor concordancia con la respuesta del proceso.
+		
+% 		\item Mientras que se obtuvo que el mejor controlador para esta aplicación fue (PONER CONTROLADOR) 
+% 	\end{itemize}
+% \end{frame}
