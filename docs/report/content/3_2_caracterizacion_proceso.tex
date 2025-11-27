@@ -1,0 +1,37 @@
+% 3_caracterizacion_proceso.tex
+
+\section{Caracterización del proceso}
+
+% Explicar detalladamente el funcionamiento de cada proceso, las no-linealidades asociadas a estos, así como todas las variables de interés y el tipo de comportamiento requerido del lazo de control con su debida justificación, incluyendo una figura con un diagrama de bloques completo con la identificación e interconexión de todos los elementos de cada proceso asignado y su sistema de control, incluyendo aquellos requeridos para la conversión de señales
+
+% Descripción de la variable controlada, variable manipulada, señal de control, perturbaciones y punto de operación. 
+
+% Funcionamiento deseado de los lazos de control (servomecanismo y/o regulatorio). 
+
+En primer lugar, se describe el sistema físico para el cual se diseña el controlador en lazo cerrado.
+El proceso consiste en un sistema generador de flujo de aire dentro de un ducto.
+El controlador, representado por $C(s)$, está implementado mediante un Arduino, que contiene el algoritmo de control y calcula la señal de control.
+Esta señal se envía al actuador $A(s)$, correspondiente al motor con aspas incrustadas en el ducto, el cual regula la rapidez del aire y, por tanto, el caudal generado.
+
+El proceso $P(s)$ está constituido por la dinámica del flujo de aire en el ducto.
+La variable controlada es el caudal de aire, que se define como la salida del sistema $y(s)$.
+Para medir esta magnitud se emplea un tubo Venturi, que cumple la función del sensor $G_s(s)$.
+Dicho dispositivo permite estimar el caudal a partir de la diferencia de presión entre dos puntos del ducto.
+La señal analógica proveniente del sensor $y'(s)$ es procesada mediante una tarjeta DAQ (\textit{data acquisition system}) de National Instruments, la cual digitaliza la medición para que pueda ser interpretada por el controlador.
+
+El sistema opera en lazo cerrado, donde la señal realimentada $y(s)$ es comparada con la referencia $r(s)$, correspondiente al caudal deseado.
+De esta comparación se obtiene la señal de error $e(s)$, que el controlador utiliza para corregir la dinámica del proceso y mantener el flujo en el rango de operación establecido (20--60 \%).
+Para las pruebas, se mantuvo específicamente en 20\%.
+Asimismo, se consideran perturbaciones $d(s)$, que representan la apertura o cierre de la compuerta de escape del ducto, la cual afecta directamente el caudal.
+
+El resumen del sistema y las interacciones entre sus componentes se presentan en la Figura \ref{fig:diagrama_bloques}.
+
+\begin{figure}[htbp]
+    \centering
+    \resizebox{\columnwidth}{!}{
+    \def\svgwidth{1.7\columnwidth}
+    \import{images/diagrama_bloques}{diagrama_bloques.pdf_tex}
+    }
+    \caption{Diagrama de bloques del proceso de flujo de aire.}
+    \label{fig:diagrama_bloques}
+\end{figure}

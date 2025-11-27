@@ -1,0 +1,150 @@
+% 6_resultados_experimentales.tex
+
+\section{Resultados experimentales}
+
+Ahora bien, en esta sección se analizaron los resultados obtenidos a partir de la prueba de los algoritmos de control en el proceso real.
+Se validaron los tres controladores continuos diseñados con los indicadores de desempeño colocados en las especificaciones de diseño únicamente ($IAE_d$, $E_{max,d}$, $TV_{u,d}$ y $U_{max,d}$).
+
+En primer lugar, se graficaron las respuestas obtenidas, donde se muestra la salida $y(t)$, la señal de control $u(t)$ y la referencia $r(t)$ en cada caso.
+Las pruebas se realizaron de forma que se llevó al sistema al punto de operación (\textit{set-point} de 20\%) manualmente y luego, se activó el modo automático con el algoritmo de control.
+Es esperable que existan diferencias entre los valores reportados experimentalmente y los simulados.
+Esto se debe a que la perturbación no fue medida y no se puede realizar una comparación bajo igualdad de criterios.
+
+Como validación del primer algoritmo de control RoPe, se tiene la respuesta temporal obtenida experimentalmente en la Figura \ref{fig:exp_rope}.
+En esta se evidencia el comportamiento regulatorio del lazo de control diseñado, donde se rechazan las perturbaciones provenientes de la apertura y cierre de la compuerta en el equipo.
+
+\begin{figure}[htbp]
+    \centering
+    \resizebox{0.95\columnwidth}{!}{
+    \def\svgwidth{1.05\columnwidth}
+    \import{images/exp}{exp_rope.pdf_tex}
+    }
+    \caption{Respuesta temporal del sistema real obtenidos con el controlador PID de RoPe.}
+    \label{fig:exp_rope}
+\end{figure}
+
+En el Cuadro \ref{tab:rope_exp}, se muestran los indicadores de desempeño de interés para la validación experimental.
+Se dividió la medición del $IAE_d$, el error máximo, el esfuerzo de control y la variación máxima de la señal de control de forma experimental en dos partes: una correspondiente a cada perturbación experimental.
+
+\begin{table}[htbp]
+    \centering
+    \caption{Indicadores de desempeño experimentales en control regulatorio para el controlador RoPe.}
+    \begin{tabular}{|c|c|c|c|}
+    \hline
+    \multirow{2}{*}{\textbf{Indicador}} &
+    \multirow{2}{*}{\textbf{Simulación}} &
+    \multicolumn{2}{c|}{\textbf{Experimental}} \\
+    \cline{3-4}
+     & & Pert. 1 & Pert. 2 \\
+    \hline
+    $IAE_d$     & 3.3032  & 5.4967 & 6.9187 \\
+    \hline
+    $E_{max,d}$ & 2.5446  & 4.6384 & 6.0773 \\
+    \hline
+    $TV_{u,d}$  & 13.9822 & 16.4995 & 19.7649 \\
+    \hline
+    $U_{max,d}$ & 11.7330 & 11.7461 & 12.8780 \\
+    \hline
+    \end{tabular}
+    \label{tab:rope_exp}
+\end{table}
+
+% Analizar
+
+
+Luego, respecto a la prueba del controlador PI obtenido a partir de síntesis analítica, se muestra el resultado en la Figura \ref{fig:exp_sintesis}.
+Al igual que el caso anterior, su comportamiento fue el esperado con la simulación.
+En el Cuadro \ref{tab:sintesis_exp}, se evidencia la similitud entre los resultados obtenidos en el proceso real y en simulación, los cuales presentan una variación pero se aproximan al valor calculado considerando que se trabaja con perturbaciones.
+
+\begin{figure}[htbp]
+    \centering
+    \resizebox{0.95\columnwidth}{!}{
+    \def\svgwidth{1.05\columnwidth}
+    \import{images/exp}{exp_sintesis.pdf_tex}
+    }
+    \caption{Respuesta temporal del sistema real obtenidos con el controlador PI de síntesis analítica.}
+    \label{fig:exp_sintesis}
+\end{figure}
+
+\begin{table}[htbp]
+    \centering
+    \caption{Indicadores de desempeño experimentales en control regulatorio para el controlador de Síntesis Analítica.}
+    \begin{tabular}{|c|c|c|c|}
+    \hline
+    \multirow{2}{*}{\textbf{Indicador}} &
+    \multirow{2}{*}{\textbf{Simulación}} &
+    \multicolumn{2}{c|}{\textbf{Experimental}} \\
+    \cline{3-4}
+     & & Pert. 1 & Pert. 2 \\
+    \hline
+    $IAE_d$     & 7.4046  & 9.0790 & 9.0957 \\
+    \hline
+    $E_{max,d}$ & 3.2679  & 5.4237 & 6.2616 \\
+    \hline
+    $TV_{u,d}$  & 10.0133 & 10.7035 & 12.1920 \\
+    \hline
+    $U_{max,d}$ & 10.0068 & 9.9521 & 10.5282 \\
+    \hline
+    \end{tabular}
+    \label{tab:sintesis_exp}
+\end{table}
+
+Finalmente, para el controlador continuo obtenido con la regla de sintonización de Brambilla, se muestra la respuesta temporal en el proceso real en la Figura \ref{fig:exp_brambilla}.
+
+\begin{figure}[htbp]
+    \centering
+    \resizebox{0.95\columnwidth}{!}{
+    \def\svgwidth{1.05\columnwidth}
+    \import{images/exp}{exp_brambilla.pdf_tex}
+    }
+    \caption{Respuesta temporal del sistema real obtenidos con el controlador PID de Brambilla.}
+    \label{fig:exp_brambilla}
+\end{figure}
+
+Adicionalmente, los indicadores de desempeño medidos de interés en la respuesta real para Brambilla se listan en el Cuadro \ref{tab:brambilla_exp}, junto con los resultados esperados de simulación.
+Como en los controladores anteriores, se presenta una tendencia similar, con mediciones ligeramente mayores pero dentro del margen.
+
+\begin{table}[htbp]
+    \centering
+    \caption{Indicadores de desempeño experimentales en control regulatorio para el controlador de Brambilla.}
+    \begin{tabular}{|c|c|c|c|}
+    \hline
+    \multirow{2}{*}{\textbf{Indicador}} &
+    \multirow{2}{*}{\textbf{Simulación}} &
+    \multicolumn{2}{c|}{\textbf{Experimental}} \\
+    \cline{3-4}
+     & & Pert. 1 & Pert. 2 \\
+    \hline
+    $IAE_d$     & 6.0944  & 7.7196 & 8.2788 \\
+    \hline
+    $E_{max,d}$ & 2.7632  & 5.2706 & 6.4657 \\
+    \hline
+    $TV_{u,d}$  & 10.0000 & 11.7785 & 13.7487 \\
+    \hline
+    $U_{max,d}$ & 10.0000 & 9.8747 & 11.1554 \\
+    \hline
+    \end{tabular}
+    \label{tab:brambilla_exp}
+\end{table}
+
+
+% Validar al menos uno de los controladores sintonizados al controlar el proceso real, y medir el desempeño del mismo (índices de error integral, esfuerzo de control, sobrepaso máximo y tiempos de asentamiento, etc.) de acuerdo al funcionamiento seleccionado del lazo de control
+
+
+% Comparar los resultados (especificaciones de diseño del punto 9.) de las simulaciones e implementación en el sistema real (punto 10.) de los algoritmos diseñados con los diversos métodos de sintonización investigados, para controlar el proceso identificado, agrupando los resultados en al menos una tabla resumen y gráficas para la evolución de las principales señales del sistema de control realimentado. Esta comparativa se realizará únicamente para el proceso utilizado en las pruebas reales del laboratorio.
+
+Ahora bien, después de la prueba de los algoritmos de control en el proceso real y de su validación respecto a los resultados simulados, falta responder a la pregunta de cuál es el mejor algoritmo de los seleccionados para controlar el proceso, según los requerimientos planteados.
+Se observa que efectivamente los tres cumplen con el error permanente nulo ante cambios tipo escalón en la perturbación.
+Asimismo, se verificó que estén dentro del rango $M_s < 1.25$ para garantizar la robustez necesaria para que el sistema no se inestabilice.
+RoPe es el menos robusto de los tres y síntesis analítica el más robusto, a pesar de que las diferencias sean pequeñas.
+
+El último requerimiento corresponde a un esfuerzo de control suave para minimizar el desgaste mecánico sobre el actuador.
+Entre las respuestas experimentales obtenidas y la simulación, se observa que RoPe es más agresivo respecto a la señal de control y presenta más variaciones y oscilaciones en su valor.
+Por otro lado, los controladores de síntesis analítica y Brambilla son más conservadores en ese sentido.
+
+Entonces, RoPe a pesar de tener mejor desempeño, por su agresiva señal de control se descarta como mejor algoritmo de control para la aplicación específica tratada.
+Se seleccionó como mejor controlador el determinado con síntesis analítica.
+Se tiene que es el más robusto ante no linealidades ($Ms = 1.158$), lo cual se probó experimentalmente que es sumamente importante para control regulatorio.
+Además, es el que mejor cuida el actuador (menor $U_{max}$ y $TV_{u,d}$), es el más estable y consistente entre perturbaciones positivas y negativas.
+Sacrifica un poco de $IAE$, pero mantiene $E_{max}$ bajo y dentro del rango apto para la aplicación.
+%Se ve bien, me gusta

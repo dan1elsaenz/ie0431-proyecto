@@ -1,0 +1,106 @@
+% 4_obtencion_modelo.tex
+
+\section{Obtención del modelo del proceso}
+
+% Realizar la identificación de al menos cuatro modelos dinámicos de orden reducido, aplicando como mínimo cuatro métodos diferentes, siendo al menos uno de estos el System Identification Toolbox de Matlab, y el otro mínimos cuadrados. Para ello, se deben emplear los datos obtenidos de forma experimental mediante pruebas a lazo abierto, suministrados con el enunciado.
+El rango de operación asignado para el proceso de flujo de aire fue del $20\%$ al $60\%$.
+Se proporcionaron los datos de la respuesta temporal del sistema de lazo abierto ante una entrada escalón de esta magnitud.
+Por lo que, se aplicaron diferentes métodos de identificación experimental de lazo abierto para obtener un modelo del proceso que se ajuste al real.
+Para el análisis a continuación, se desplazó la respuesta real del sistema hacia el origen para modelar únicamente alrededor del punto de operación, pues al tratarse de un sistema no lineal, conviene analizar solamente este rango con condiciones iniciales nulas.
+
+Como primer método de identificación, se utilizó el \textit{System Identification Toolbox} de Matlab\,\textsuperscript{\tiny\textregistered}.
+Con este, se obtuvo que el modelo con mejor ajuste a los datos experimentales fue un segundo orden más tiempo muerto (SOMTM) con polos reales (P2D en Matlab), a partir del método de búsqueda de \textit{nonlinear least squares}.
+Sin embargo, este modelo tiene un polo rápido que no es significativo para el modelo.
+Por esta razón, se seleccionó un primer orden más tiempo muerto (POMTM), cuyo ajuste es similar, pero su forma es más sencilla para obtener controladores a partir de reglas de sintonización.
+Dicha función de transferencia junto con los parámetros que la describen corresponde a:
+
+\begin{equation}
+    P_{\text{SIT}}(s) = \frac{0.9204 e^{-0.1371 s}}{1.0507 s + 1}.
+\end{equation}
+
+Como segundo método de identificación a lazo abierto, se aplicó Alfaro 123c para un primer orden más tiempo muerto (POMTM).
+Este consiste en identificar los tiempos al $25\%$ y $75\%$ del valor final de la salida respecto a la entrada, medidos desde el cambio en la entrada.
+A partir de estos tiempos, se aplican las ecuaciones a continuación:
+\begin{equation} \label{eq:alfaro123c}
+    \begin{gathered}
+        K = \frac{\Delta y}{\Delta u}, \\
+        \tau = a (t_{75} - t_{25}), \\
+        L = b t_{25} + (1-b) t_{75}, \\
+    \end{gathered}
+\end{equation}
+con $a = 0.910$ y $b = 1.262$. \cite{alfaro2006123c}
+
+A partir de las expresiones anteriores, se determinó la función de transferencia obtenida con este método:
+
+\begin{equation}
+    P_{\text{123c}}(s) = \frac{0.9215 e^{-0.1923 s}}{0.9887s + 1}.
+\end{equation}
+
+En cuanto al tercer método de identificación utilizado, se empleó Ho et al. (1995).
+Este utiliza las expresiones en \eqref{eq:alfaro123c}, con $a = 0.670$ y $b = 1.290$.
+La función de transferencia resultante de POMTM consiste en: \cite{Ho1995}
+
+\begin{equation}
+    P_{\text{Ho}}(s) = \frac{0.9215 e^{-0.1484 s}}{1.0653s + 1}.
+\end{equation}
+
+Finalmente, se aplicó el método de mínimos cuadrados para obtener el cuarto modelo del proceso a controlar.
+En el enunciado, se solicitan modelos de orden reducido; es decir, menor o igual a dos.
+Como en los anteriores se encontraron modelos de primer orden, para este caso también se buscó un modelo con estas características.
+Entonces, se planteó la matriz de regresores denotada por $\Phi$, de forma que incluya entradas y salidas de un instante de tiempo antes.
+Lo anterior equivale a $u(k-1)$ y $y(k-1)$.
+Los coeficientes de la función de transferencia resultante se obtienen a partir de la ecuación:
+
+\begin{equation}
+    \theta_{\text{LS}} = (\Phi^T  \Phi)^{-1} (\Phi^T y).
+\end{equation}
+
+Finalmente, con base en los datos proporcionados de la respuesta de lazo abierto, se obtuvo el siguiente modelo discreto de orden reducido:
+
+\begin{equation} \label{eq:ft_ls}
+    P_{\text{LS}}(z) = \frac{0.01895 z^{-1}}{1 - 0.9796 z^{-1}}
+\end{equation}
+
+% Comparar los modelos dinámicos obtenidos para seleccionar el mejor para cada proceso, de acuerdo a un índice integral adecuado para este fin, calculado a partir del error de modelado
+Para realizar la comparación entre los modelos dinámicos obtenidos para determinar cuál se ajusta de mejor forma al proceso, se utilizó el índice integral IAE (\textit{Integral of Absolute Error}).
+Los resultados obtenidos se resumen en el Cuadro \ref{tab:comparativa-modelos}.
+Por lo tanto, se seleccionó el modelo obtenido a partir del \textit{System Identification Toolbox} de Matlab como el mejor modelo; su error respecto a los datos reales resultó menor comparado con los demás.
+Asimismo, se utilizó el índice integral ISE como segunda verificación y se obtuvo el mismo resultado.
+
+\begin{table}[htbp]
+\caption{Comparativa de modelos dinámicos obtenidos de acuerdo al IAE.}
+\label{tab:comparativa-modelos}
+\begin{center}
+    \begin{tabular}{|c|c|}
+    \hline
+    \textbf{Modelo} & \textbf{IAE} \\
+    \hline
+    \textit{System Identification Toolbox} & $4.1709$  \\
+    \hline
+    123c & $4.9764$ \\
+    \hline
+    Ho et al. & $4.4105$  \\
+    \hline
+    Mínimos cuadrados & $7.6184$ \\
+    \hline
+    \end{tabular}
+\end{center}
+\end{table}
+
+En la Figura \ref{fig:identificacion_experimental}, se muestra la simulación de las respuestas temporales obtenidas para cada uno de los modelos determinados anteriormente, junto con la entrada $u(t)$ correspondiente al escalón aplicado al proceso real.
+
+\begin{figure}[htbp]
+    \centering
+    \resizebox{0.95\columnwidth}{!}{
+    \def\svgwidth{1\columnwidth}
+    \import{images/identificacion_modelos}{identificacion_modelos.pdf_tex}
+    }
+    \caption{Respuesta dinámica de los modelos obtenidos a partir de identificación experimental.}
+    \label{fig:identificacion_experimental}
+\end{figure}
+
+% Analizar la variación de las características dinámicas de los procesos en el ámbito de operación establecido.
+Respecto a las características dinámicas del proceso en el ámbito de operación establecido ante un cambio escalón del $20\%$ al $60\%$, se determinó que el sistema a lazo abierto presentó una ganancia positiva y requiere una acción de control inversa ($+1$).
+Asimismo, presenta una respuesta con tiempo muerto cercano a $0$, pero según los métodos de identificación, sí presenta uno reducido.
+
+Entonces, con el modelo de mejor ajuste determinado y las características dinámicas de la planta analizadas, se continúa con el diseño de los algoritmos de control.

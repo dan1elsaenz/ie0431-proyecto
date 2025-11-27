@@ -1,0 +1,17 @@
+% 7_conclusiones.tex
+
+\section{Conclusiones}
+
+% Establecer, a partir de los resultados obtenidos, las conclusiones del proyecto de diseño respecto a cuál es el mejor controlador diseñado, proporcionando las razones que justifican la elección del controlador, e indicando además las posibles mejoras a realizar en el diseño propuesto.
+
+Las principales conclusiones determinadas a partir del proceso de diseño e implementación de los algoritmos de control para el proceso de flujo de aire se enumeran a continuación:
+
+\begin{enumerate}
+    \item A partir de los datos experimentales obtenidos en el rango de operación de un 20\% al 60\%, se aplicaron distintos métodos de identificación de lazo abierto para ajustar modelos dinámicos de la respuesta real del proceso.
+    Dichos modelos se compararon mediante el índice $IAE$ para poder determinar el mejor el modelo de mejor ajuste.
+    Siendo este el obtenido mediante \textit{System Identification Toolbox}, el cual correspondió a un primer orden más tiempo muerto con polos reales.
+    \item Entre los tres algoritmos de control continuos diseñados, se tiene que el mejor controlador para las especificaciones requeridas en el proceso es \textbf{síntesis analítica}, pues tiene la mayor robustez y el menor esfuerzo de control (amigable con el actuador). El obtenido con Brambilla tiene especificaciones intermedias entre los tres y finalmente, RoPe tiene mejor desempeño (respecto a $IAE$ y error máximo) pero es más agresivo con el actuador y esto no se encuentra dentro de los requerimientos.
+    \item El controlador diseñado mediante LGR discreto mostró el mejor desempeño en servocontrol y control regulatorio entre los algoritmos evaluados en la simulación. Presentó el menor $IAE_d$, el menor error máximo, el menor tiempo para alcanzar dicho error y el menor $M_s = 1.055$.
+    Además, mantuvo un esfuerzo de control reducido. Estos resultados demostraron un lazo con alto amortiguamiento y robusto, con una buena respuesta temporal.
+
+\end{enumerate}

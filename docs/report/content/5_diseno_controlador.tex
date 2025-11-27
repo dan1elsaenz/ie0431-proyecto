@@ -1,0 +1,337 @@
+% 5_diseno_controlador.tex
+
+\section{Diseño de los algoritmos de control}
+
+% Establecer las especificaciones requeridas de diseño para el proceso a controlar: desempeño, esfuerzo de control y robustez, que se consideren adecuadas para el problema propuesto. Se recomienda basar los requerimientos en el funcionamiento de un ejemplo de aplicación real a investigar, sobre un proceso similar al asignado, el cual debe ser brevemente descrito.
+Primero, se requiere definir las especificaciones de diseño para el proceso a controlar.
+Como se explicó anteriormente, para la aplicación mencionada, se precisa un algoritmo para control regulatorio, de forma que rechace las perturbaciones bajo una referencia constante.
+
+Para el diseño del algoritmo de control $C(s)$ del sistema de control realimentado, se plantearon las siguientes especificaciones dada la aplicación de flujo de aire en una cabina de bioseguridad:
+\begin{itemize}
+    \item Error permanente nulo ante cambios tipo escalón en la perturbación.
+    \item Sensibilidad máxima $M_s < 1.25$ para un diseño robusto y estable, debido a las no-linealidades del proceso.
+    \item Esfuerzo de control suave, con transiciones graduales que minimizan el desgaste mecánico del actuador.
+\end{itemize}
+
+Ante estos requerimientos, se requiere un algoritmo de control de la forma PI o PID-estándar, para garantizar un error permanente nulo ante cambios en la perturbación.
+Entonces, se buscaron diversas reglas de sintonización, donde las que resultaron funcionales se describen a continuación.
+
+% Seleccionar al menos tres algoritmos de control continuos y uno discreto a utilizar junto con su respectiva estructura y seleccionando su acción. Se debe garantizar que los parámetros finales se puedan incorporar en un PID con la estructura estándar, ya que es esta la que se encuentra implementada en los microcontroladores a utilizar en el laboratorio.
+% Realizar el ajuste de los parámetros de los controladores utilizando las estrategias y métodos que se consideren adecuados para el problema propuesto, a partir del mejor modelo identificado para el proceso dado. Se pueden utilizar métodos expuestos en diversas fuentes bibliográficas (libros, revistas IEEE, publicaciones IFAC, el Handbook de reglas de sintonización PID [1], etc.). Como máximo se podrán utilizar uno de los métodos de sintonización vistos en las presentaciones del curso (ej. Síntesis Analítica, USORT, etc.) en cada proceso. Para el control discreto se utilizarán las herramientas de diseño asistido por computador (Control System Designer en MATLAB ®).
+
+Ahora bien, en cuanto a los algoritmos de control continuos, se tiene que el primero corresponde al método RoPe (\textit{Robust-performance}) mostrado en \cite{Alfaro2011RoPe}.
+Este corresponde a una regla de sintonización de dos grados de libertad, que permite diseñar los parámetros de un PID para un grado determinado de robustez, al optimizar el IAE.
+El proceso de optimización se realiza al fijar un valor de sensibilidad máxima ($M_s$) dada y se optimiza el desempeño en control regulatorio.
+Con los parámetros resultantes se optimiza el desempeño en servocontrol con el segundo grado de libertad.
+En este caso, por las características de la aplicación enfocada, no se requiere el segundo grado de libertad.
+
+La función de transferencia resultante para el algoritmo de control tiene la forma:
+\begin{equation} \label{eq:ft-rope}
+    C_(s) = K_p \left( 1 + \frac{1}{T_i s} + \frac{T_d s}{0.1T_ds + 1}\right).
+\end{equation}
+
+Los parámetros se obtienen con las ecuaciones a continuación:
+\begin{equation}
+    \begin{gathered}
+        K_p = \frac{a_0 + a_1 \tau_o}{K(a_2 + \tau_o)}, \\
+        T_i = T\left(b_0 + b_1 \tau_o^{b_2}\right), \\
+        T_d = T\left(c_0 + c_1 \tau_o^{c_2}\right). \\
+    \end{gathered}
+\end{equation}
+
+Para el diseño, se consideró un $M_s = 1.2$, con el fin de garantizar la robustez necesaria, así como un tiempo muerto normalizado $\tau_0 = 0.1305$.
+Los parámetros obtenidos para el PID corresponden a:
+
+\begin{equation}
+    \begin{split}
+        K_p &= 1.6825, \\
+        T_i &= \SI{0.4279}{\second}, \\
+        T_d &= \SI{0.0757}{\second}. \\
+    \end{split}
+\end{equation}
+
+Ahora, el segundo algoritmo de control continuo fue obtenido a partir del método de síntesis analítica, visto en clase.
+Este busca una respuesta de la forma:
+\begin{equation}
+    M_{yd}(s) = \frac{K_{yd}se^{-Ls}}{\left(\tau_c T s + 1\right)^2},
+\end{equation}
+a partir de un controlador PI de dos grados de libertad.
+Este asegura un error permanente nulo ante cambios en la perturbación ($e_{pd0}=0$) y una dinámica de segundo orden gobernada por el parámetro de diseño $\tau_c$.
+Al igual que en el caso de RoPe, el segundo grado de libertad está orientado al comportamiento en servocontrol y no se utilizará para este diseño.
+
+Luego, para la selección de los parámetros del algoritmo de control, se requiere definir una sensibilidad máxima límite $M_s < 1.2$.
+Para este valor deseado de $M_s$ y el tiempo muerto normalizado $\tau_0 = 0.1305$, el método proporciona una aproximación para el valor mínimo de $\tau_c$:
+\begin{equation}
+\tau_{c,\min}(M_s,\tau_0) = k_{11} + \left(\frac{k_{12}}{k_{13}}\right)\tau_0,
+\end{equation}
+cuyas constantes $k_{11}$, $k_{12}$ y $k_{13}$ están dadas por las ecuaciones a continuación:
+\begin{equation}
+    \begin{split}
+    k_{11} &= 1.384 - 1.063M_s + 0.262M_s^2, \\
+    k_{12} &= -1.915 + 1.415M_s - 0.077M_s^2, \\
+    k_{13} &= 4.382 - 7.396M_s + 3.000M_s^2.
+    \end{split}
+\end{equation}
+
+El parámetro $\tau_c$ correspondiente a la constante de tiempo deseada debe respetar las restricciones:
+\begin{equation}
+    \begin{gathered}
+        \max\left\{\frac{1}{2},\tau_{c,\min}\right\} \leq \tau_c \leq 1.50 + 0.3\tau_0, \\
+        0.7327 \leq \tau_c \leq 1.5391. \\
+    \end{gathered}
+\end{equation}
+
+Se seleccionó $\tau_c = 0.8$ s para el diseño, con el fin de garantizar un diseño robusto.
+Las expresiones que modelan los valores de los parámetros del PID-estándar corresponden a:
+\begin{equation}
+    \begin{gathered}
+        K_p = \frac{\tau_c (2 - \tau_c) + \tau_0}{K(\tau_c + \tau_0)^2}, \\
+        T_i = T\frac{\tau_c (2 - \tau_c) + \tau_0}{1 + \tau_0}, \\
+        T_d = 0.
+    \end{gathered}
+\end{equation}
+
+Los resultados de los parámetros obtenidos se resumen a continuación:
+\begin{equation}
+    \begin{split}
+        K_p &= 1.3684, \\
+        T_i &= \SI{1.0135}{\second}, \\
+        T_d &= \SI{0}{\second}.
+    \end{split}
+\end{equation}
+
+Para el tercer algoritmo de control continuo, se utilizó la regla de sintonización dada por Brambilla et al. en \cite{brambilla1989}.
+Este método tiene la restricción de $0.1 \leq \tau_0 \leq 10$, para la cual el modelo cumple satisfactoriamente.
+El algoritmo de control resultante tiene la forma de PID-estándar, cuyos parámetros están dados por:
+\begin{equation}
+    \begin{gathered}
+        K_p =  \frac{T + 0.5L}{K (\lambda + L)}, \\
+        T_i = T + 0.5L, \\
+        T_d = \frac{TL}{2T + L},
+    \end{gathered}
+\end{equation}
+donde $\lambda$ corresponde a un parámetro en el rango de $0.1T \leq \lambda \leq 0.5T$.
+Como se requiere una alta robustez, se seleccionó el límite superior $\lambda = 0.5T = 0.5253$ s, con $T$ igual a la constante de tiempo del modelo.
+
+A partir de la evaluación de los parámetros del PID-estándar, se muestran a continuación los valores obtenidos:
+\begin{equation}
+    \begin{split}
+        K_p &= 1.8356, \\
+        T_i &= \SI{1.1193}{\second}, \\
+        T_d &= \SI{0.0644}{\second}. \\
+    \end{split}
+\end{equation}
+
+El último controlador diseñado corresponde a uno discreto, obtenido a partir del método del LGR discreto.
+Para ello, se utilizó el modelo del proceso resultante de la técnica de mínimos cuadrados de \eqref{eq:ft_ls}, en su forma \texttt{zpk}.
+Para la realización de este, se utilizó la herramienta de diseño de sistemas de control asistido por computador \texttt{Sisotool} de Matlab.
+Asimismo, se seleccionó un tiempo de muestreo de \SI{0.0265}{\second}, correspondiente al tiempo de muestreo proporcionado en los datos originales para la identificación experimental.
+
+El método del LGR discreto está enfocado en servocontrol, pero el caso de diseño es control regulatorio, entonces se buscó una respuesta estable, de forma que los polos se encuentren dentro del círculo unitario ($z = 1$).
+Asimismo, se busca que los polos estén cerca de $z=1$ para mejorar la estabilidad del lazo y el amortiguamiento.
+Se estableció arbitrariamente un requerimiento de una respuesta sin oscilaciones y un tiempo de asentamiento al $2\%$ menor a \SI{1}{\second} (para el escalón unitario en Sisotool), de forma que estas características se trasladen a control regulatorio en el caso idóneo.
+Estos se colocan como requerimientos de diseño en \texttt{Sisotool} y se obtiene la Figura \ref{fig:lgr_discreto}.
+
+Se realizó un controlador PI discreto para el diseño del algoritmo de control discreto, el cual tiene la forma:
+\begin{equation}
+    \begin{split}
+        C(z) &= \frac{\left(K_p + K_i\right)z - K_p}{z-1}, \\
+        &= \frac{K\left(z - a\right)}{z-1},
+    \end{split}
+\end{equation}
+donde la primera expresión corresponde a la forma PI-paralelo del controlador y la segunda se va a utilizar para el diseño en \texttt{Sisotool}.
+
+\begin{figure}[htbp]
+    \centering
+    \resizebox{0.95\columnwidth}{!}{
+    \def\svgwidth{1.05\columnwidth}
+    \import{images/lgr_discreto}{lgr.pdf_tex}
+    }
+    \caption{LGR para el diseño del algoritmo de control discreto con controlador PI.}
+    \label{fig:lgr_discreto}
+\end{figure}
+
+Entonces, según la forma de la función de transferencia discreta \eqref{eq:ft_ls}, se tiene un polo en $z = 0.9796$.
+Se realizó la cancelación de este polo con el cero real de $C(z)$, lo cual equivale a $a = -0.9796$.
+Por lo tanto, la ganancia queda como parámetro de ajuste para obtener la respuesta deseada.
+
+\begin{figure}[htbp]
+    \centering
+    \resizebox{0.95\columnwidth}{!}{
+    \def\svgwidth{1.05\columnwidth}
+    \import{images/lgr_discreto}{salida_lgr.pdf_tex}
+    }
+    \caption{Respuesta temporal de la salida ante un cambio escalón unitario de \texttt{Sisotool} para el diseño del controlador PI con LGR discreto.}
+    \label{fig:salida_lgr_discreto}
+\end{figure}
+
+Se ajustó para un tiempo de asentamiento al $2\%$ de \SI{0.954}{\second} y sin sobrepaso máximo ante el cambio escalón en \texttt{Sisotool}, así como que se verificó que se tenga un $M_s < 1.25$ para garantizar la robustez necesaria.
+Únicamente, se agregó la gráfica de la respuesta de la salida en Sisotool para demostrar la validez del diseño.
+La señal de control se omitió, pero en su lugar puede consultar la sección \ref{sec:simulaciones} de simulaciones, donde se probó más a detalle el presente algoritmo de control.
+Como dato extra que da \texttt{Sisotool}, se obtuvo un margen de ganancia de \SI{25.7}{\deci\bel} y un margen de fase de \SI{87}{\degree}.
+
+Finalmente, se obtuvieron los parámetros mostrados a continuación:
+\begin{equation}
+    \begin{split}
+        K &= 5.5, \\
+        a &= -0.9796, \\
+    \end{split}
+\end{equation}
+los cuales, en la forma de PI-paralelo equivalen a las ganancias:
+\begin{equation}
+    \begin{split}
+        K_p &= -Ka = 5.3878, \\
+        K_i &= K - K_p = \SI{0.1122}{\second^{-1}}. \\
+    \end{split}
+\end{equation}
+
+
+% Medir las distintas especificaciones de diseño (rendimiento, esfuerzo de control y robustez; ya sea que se hayan utilizado o no en el diseño final del controlador) a partir de los resultados de las simulaciones computacionales realizadas en el funcionamiento como servocontrol y como control regulatorio, empleando el mejor modelo identificado para el proceso. Se agruparán estos resultados en tablas para facilitar su análisis
+\section{Simulación de los algoritmos de control} \label{sec:simulaciones}
+
+En esta sección, se realizó la simulación y obtención de las especificaciones para cada uno de los algoritmos de control, tanto los continuos como el discreto.
+Primero, en las Figuras \ref{fig:sim_y_reg} y \ref{fig:sim_u_reg} se muestra la respuesta temporal de la salida del sistema $y(t)$ y la señal de control $u(t)$ para control regulatorio, respectivamente.
+Se modeló la perturbación como un escalón unitario con un valor del $10\%$ de amplitud.
+
+\begin{figure}[htbp]
+    \centering
+    \resizebox{0.95\columnwidth}{!}{
+    \def\svgwidth{1.05\columnwidth}
+    \import{images/respuestas}{y_reg.pdf_tex}
+    }
+    \caption{Simulación temporal de la entrada y salidas de los algoritmos en control regulatorio.}
+    \label{fig:sim_y_reg}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \resizebox{0.95\columnwidth}{!}{
+    \def\svgwidth{1.05\columnwidth}
+    \import{images/respuestas}{u_reg.pdf_tex}
+    }
+    \caption{Simulación temporal de la entrada y señal de control de los algoritmos en control regulatorio.}
+    \label{fig:sim_u_reg}
+\end{figure}
+
+Luego, en el Cuadro \ref{tab:indicadores_regulatorio_sim}, se muestran los indicadores de desempeño obtenidos para control regulatorio, para cada uno de los algoritmos de control considerados en el proyecto.
+
+\begin{table}[htbp]
+\centering
+\caption{Indicadores de desempeño en control regulatorio para los algoritmos considerados.}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\textbf{Indicador} & \textbf{RoPe} & \textbf{Sínt. Analítica} & \textbf{Brambilla} & \textbf{LGR discreto} \\
+\hline
+$IAE_d$         & 3.3032 & 7.4046 & 6.0944 & 2.3592 \\
+\hline
+$TV_{u,d}$      & 13.9822 & 10.0133 & 10.0000 & 10.0000 \\
+\hline
+$U_{max,d}$     & 11.7330 & 10.0068 & 10.0000 & 10.0000 \\
+\hline
+$E_{max,d}$     & 2.5446 & 3.2679 & 2.7632 & 1.2489 \\
+\hline
+$t_{E_{max,d}}$ (s) & 0.7532 & 0.9853 & 0.9148 & 0.5110 \\
+\hline
+$e_{perm,d}$    & 0.0000 & 0.0000 & 0.0000 & 0.0000 \\
+\hline
+\end{tabular}
+\label{tab:indicadores_regulatorio_sim}
+\end{table}
+
+
+% Comparación
+Como primer parámetro de diseño, se observa que los cuatro algoritmos de control cumplen con un error permanente nulo ante cambios en la perturbación.
+Respecto al $IAE_d$, se observa que el algoritmo de control discreto con LGR es el que presenta menor valor, seguido de RoPe.
+El peor en este sentido es síntesis analítica.
+Este indicador se vincula con la forma en que el algoritmo rechaza la perturbación.
+
+Asimismo, en cuanto al esfuerzo de control $TV_{u,d}$, se observa que el Brambilla, síntesis analítica y el LGR discreto presentan las transiciones más suaves de $u(t)$ para control regulatorio; es decir, generan el menor desgaste sobre el actuador.
+Finalmente, respecto al error máximo alcanzado en control regulatorio, se tiene que el LGR discreto presenta el menor y síntesis analítica el mayor, los demás presentan valores intermedios.
+
+En el enunciado del proyecto, también se solicitó obtener la respuesta temporal de la salida $y(t)$ y de la señal de control $u(t)$ en el modo de servocontrol, a pesar de que no sea el caso de diseño.
+Estas se muestran en la Figura \ref{fig:sim_y_servo} y \ref{fig:sim_u_servo}, con un cambio en la referencia de 0 a 20\%, de forma que se lleva al sistema al punto de operación de control regulatorio.
+
+\begin{figure}[htbp]
+    \centering
+    \resizebox{0.95\columnwidth}{!}{
+    \def\svgwidth{1.05\columnwidth}
+    \import{images/respuestas}{y_servo.pdf_tex}
+    }
+    \caption{Simulación temporal de la entrada y salidas de los algoritmos en servocontrol.}
+    \label{fig:sim_y_servo}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \resizebox{0.95\columnwidth}{!}{
+    \def\svgwidth{1.05\columnwidth}
+    \import{images/respuestas}{u_servo.pdf_tex}
+    }
+    \caption{Simulación temporal de la entrada y señal de control de los algoritmos en servocontrol.}
+    \label{fig:sim_u_servo}
+\end{figure}
+
+Adicionalmente, se obtuvieron indicadores de desempeño de servocontrol para cada algoritmo de control.
+En el Cuadro \ref{tab:indicadores_servo_sim}, se muestra la comparación entre cada uno de ellos.
+
+\begin{table}[htbp]
+\centering
+\caption{Indicadores de desempeño en servocontrol para los algoritmos considerados.}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\textbf{Indicador} & \textbf{RoPe} & \textbf{Sínt. Analítica} & \textbf{Brambilla} & \textbf{LGR discreto} \\
+\hline
+$IAE_r$       & 14.1843 & 16.1524 & 13.2998 & 5.2848 \\
+\hline
+$TV_{u,r}$    & 211.8826 & 40.4101 & 191.8743 & 178.4697 \\
+\hline
+$U_{max,r}$   & 100.0000 & 31.0696 & 100.0000 & 100.0000 \\
+\hline
+$t_{a2,r}$ (s)  & 3.8731 & 2.5947 & 2.2219 & 0.9625 \\
+\hline
+$t_{\text{pico}}$ (s)  & 1.5412 & 4.6273 & 4.1350 & 2.0490 \\
+\hline
+$M_{pn}$ (\%) & 18.8372 & 0.0437 & 0.0433 & 0.0347 \\
+\hline
+$e_{perm,r}$  & 0.0042 & -0.0039 & -0.0021 & -0.0002 \\
+\hline
+\end{tabular}
+\label{tab:indicadores_servo_sim}
+\end{table}
+
+Los valores elevados del esfuerzo de control fueron causados por los cambios bruscos en la señal de control, en el momento de cambiar la referencia de $0$ a $20\%$.
+Al no haber diseñado específicamente para este caso, se generan picos y transiciones bruscas que elevan su valor.
+El más conservador en este sentido es síntesis analítica.
+
+Adicionalmente, como se está realizando un diseño de los controladores enfocado en robustez, se debe medir la sensibilidad máxima $M_s$ resultante para cada algoritmo de control obtenido.
+En el Cuadro \ref{tab:sensibilidad_maxima}, se muestran los valores de $M_s$ obtenidos y en la Figura \ref{fig:m_s}, se muestra una comparativa gráfica entre ellas.
+
+\begin{table}[htbp]
+\centering
+\caption{Sensibilidad máxima $M_s$ obtenida en algoritmos de control considerados.}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\textbf{Algoritmo} & \textbf{Sensibilidad máxima} \\
+\hline
+RoPe            & 1.222 \\
+\hline
+Sínt. Analítica & 1.158 \\
+\hline
+Brambilla       & 1.170 \\
+\hline
+Discreto        & 1.055 \\
+\hline
+\end{tabular}
+\label{tab:sensibilidad_maxima}
+\end{table}
+
+\begin{figure}[htbp]
+    \centering
+    \resizebox{0.95\columnwidth}{!}{
+    \def\svgwidth{1.05\columnwidth}
+    \import{images/m_s}{m_s.pdf_tex}
+    }
+    \caption{Magnitud de la sensibilidad $S(j\omega)$ en función de la frecuencia angular (rad/s) para los algoritmos de control considerados.}
+    \label{fig:m_s}
+\end{figure}
+
+Como se observa, los algoritmos de control tienen un nivel de robustez similar y cumplen con el requerimiento de $M_s < 1.25$ para que funcione en el sistema real.
+
