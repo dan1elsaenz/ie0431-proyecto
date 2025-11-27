@@ -1,6 +1,6 @@
 %[text] ## Identificación del modelo del proceso
 %[text] Lectura y preprocesamiento de los datos
-M = readmatrix('delta_20a60.csv');
+M = readmatrix('identificacion/delta_20a60.csv');
 
 % Extraer datos
 t = M(550:end, 1);
@@ -36,23 +36,24 @@ legend('Salida y(t)', 'Control u(t)', 'Location', 'southeast');
 %[text] ### System Identification Toolbox
 %[text] Modelo P2D: `98.05%`
 %[text] Modelo P1D: `98.04%`
-systemIdentification('identificacion/identificacion_sistema.sid');
-%%
-%[text] Modelo SOMTM: Polos reales
-% Modelo P2D
+%[text] Se seleccionó P1D, pues P2D tiene un polo rápido que dificulta el diseño de controladores.
+% Descomentar para abrir el System Identification Toolbox con la
+% configuración utilizada
+% systemIdentification('identificacion/identificacion_sistema.sid');
+
+% Modelo P1D
 s = tf('s');
-K = 0.920379287458449;
-L = 0.089649500000000;
-T = 1.047866225848407;
-a = 0.049017947318623 / 1.047866225848407;
-P2D = (K * exp(-L * s)) / ((T*s + 1)*(a*T*s + 1));
+K = 0.9204;
+L = 0.1371;
+T = 1.0507;
+P_sit = (K * exp(-L * s)) / (T*s + 1)
 
-
-y_p2d_sim = lsim(P2D, u_real, t_real);
+% Simulación del modelo de System Identification Toolbox
+y_p_sit_sim = lsim(P_sit, u_real, t_real);
 
 % Graficar
 figure;
-plot(t_real, y_p2d_sim, 'r');
+plot(t_real, y_p_sit_sim, 'r');
 hold on;
 plot(t_real, y_real, 'y');
 plot(t_real, u_real, 'b');
@@ -63,25 +64,23 @@ ylabel('Amplitud');
 legend('Modelo y(t) (P2D)', 'Salida y(t)', 'Control u(t)', 'Location','southeast');
 
 % Índices integrales
-IAE = trapz(t_real,abs(y_real-y_p2d_sim))
-ISE = trapz(t_real, abs(y_real-y_p2d_sim).^2)
+IAE = trapz(t_real,abs(y_real-y_p_sit_sim))
+ISE = trapz(t_real, abs(y_real-y_p_sit_sim).^2)
 %%
 %[text] ### Mínimos cuadrados
 % Regresores
 Phi = [ ...
   [0;          y_real(1:end-1)], ...   % y(k-1)
-  [0;0;        y_real(1:end-2)], ...   % y(k-2)
   [0;          u_real(1:end-1)], ...   % u(k-1)
-  [0;0;        u_real(1:end-2)]        % u(k-2)
 ];
 
 % Coeficientes
 theta = (Phi' * Phi) \ (Phi' * y_real);
 
-H_ls = tf([0, theta(3:end)'], [1, -theta(1:2)'], Ts, 'Variable', 'z^-1');
+P_ls = tf([0, theta(2)'], [1, -theta(1)'], Ts, 'Variable', 'z^-1')
 
 % Simulación del modelo obtenido con mínimos cuadrados
-y_ls_sim = lsim(H_ls, u_real, t_real);
+y_ls_sim = lsim(P_ls, u_real, t_real);
 
 % Índices integrales
 IAE = trapz(t_real,abs(y_real-y_ls_sim))
@@ -176,7 +175,7 @@ xlabel('Tiempo (s)');
 ylabel('Amplitud');
 legend('Modelo y(t) (123c)', 'Salida y(t)', 'Control u(t)', 'Location','southeast');
 %%
-%[text] ### Ho
+%[text] ### Ho et al.: Dos puntos
 deltaY = yf_prom - yi_prom;
 deltaU = u(end) - u_i;
 
@@ -225,7 +224,7 @@ fig = figure;
 plot(t_real, y_real+yi_prom, 'Color', '#828282', 'LineWidth', 1.25); % Datos reales
 hold on;
 % Graficar la simulación de todos los modelos
-plot(t_real, y_p2d_sim+yi_prom, 'r');                  % System Identification Toolbox
+plot(t_real, y_p_sit_sim+yi_prom, 'r');                  % System Identification Toolbox
 plot(t_real, y_123c1_sim+yi_prom, 'Color', '#800080'); % 123c primer orden
 plot(t_real, y_ls_sim+yi_prom, 'Color', '#50C878');    % Mínimos cuadrados
 plot(t_real, y_ho_sim+yi_prom, 'b');                   % Ho et al.

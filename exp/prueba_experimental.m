@@ -1,26 +1,17 @@
 %[text] ## Graficar datos experimentales con controladores
-%[text] ### Kristiansson 2003
+%[text] En este documento, se grafican los datos experimentales de la prueba de controladores y se analizan las especificaciones de interés de cada uno.
+%[text] ### RoPe
 clear;
 clc;
 
-M = readmatrix('data/3-2_kristiansson.csv');
+M = readmatrix('exp/3-2_rope.csv');
 
-% Extraer datos
-t = M(:, 1);
-r = M(:, 2);
-y = M(:, 3);
-u = M(:, 4);
-
-t1 = t(1:900);
-r1 = r(1:900);
-y1 = y(1:900);
-u1 = u(1:900);
-
-t2 = t(901:2000);
-r2 = r(901:2000);
-y2 = y(901:2000);
-u2 = u(901:2000);
-
+% Extraer datos (25 s)
+t = M(1:1919, 1);
+t = t - t(1);
+r = M(1:1919, 2);
+y = M(1:1919, 3);
+u = M(1:1919, 4);
 
 % Graficar
 fig1 = figure;
@@ -32,69 +23,138 @@ hold off;
 grid on;
 xlabel('Tiempo (s)');
 ylabel('Amplitud (%)');
-legend('Salida y(t)', 'Control u(t)', 'Referencia r(t)');
+legend('Salida y(t)', 'Control u(t)', 'Referencia r(t)', 'Location', 'best');
 
 % Exportar svg
-%set(fig1, 'Units', 'inches');
-%fig1.Position(3:4) = [3.5 2.5]; % Ancho = 3.5 in, alto = 2.5 in
-%exportgraphics(fig1, 'exp_kristiansson.svg', 'ContentType', 'vector');
+set(fig1, 'Units', 'inches');
+fig1.Position(3:4) = [3.5 2.5]; % Ancho = 3.5 in, alto = 2.5 in
+exportgraphics(fig1, 'exp_rope.svg', 'ContentType', 'vector');
+
+% Especificaciones
+e = r - y;
+
+idx1 = t >= 0 & t <= 10;  % Perturbación 1
+idx2 = t >= 15 & t <= 25; % Perturbación 2
+
+% IAE
+IAE_d1 = trapz(t(idx1), abs(e(idx1)))
+IAE_d2 = trapz(t(idx2), abs(e(idx2)))
+
+% Error máximo
+Emax1 = max(abs(e(idx1)))
+Emax2 = max(abs(e(idx2)))
+
+% Esfuerzo de control
+TVu1 = sum(abs(diff(u(idx1))))
+TVu2 = sum(abs(diff(u(idx2))))
+
+% Señal de control máxima
+Umax1 = abs(max(u(idx1)) - u(1))
+Umax2 = abs(min(u(idx2)) - u(1163)) % Desde 15 s
 %%
-%[text] Cálculo de índices
-IAEd1 = trapz(t,abs(r-y))
-TVud1 = sum(abs(diff(u)))
+%[text] ### Síntesis
+clear;
+clc;
 
-min(y);
-max(y);
+M = readmatrix('exp/3-2_sintesis.csv');
 
-u2_inicial = u2(1);
-y2_final = 16;
+% Extraer datos (25 s)
+t = M(1:1462, 1);
+t = t - t(1);
+r = M(1:1462, 2);
+y = M(1:1462, 3);
+u = M(1:1462, 4);
 
-% Cambio máximo de la señal de control
-% Extremos absolutos superior e inferior
-[Upos, ind_pos] = max(u2);
-[Uneg, ind_neg] = min(u2);
+% Graficar
+fig1 = figure;
+plot(t, y);
+hold on;
+plot(t, u, 'Color', '#800080');
+plot(t, r, 'r')
+hold off;
+grid on;
+xlabel('Tiempo (s)');
+ylabel('Amplitud (%)');
+legend('Salida y(t)', 'Control u(t)', 'Referencia r(t)', 'Location', 'best');
 
-% Desvíos respecto a u2_inicial
-dUpos = Upos - u2_inicial;
-dUneg = Uneg - u2_inicial;
+% Exportar svg
+set(fig1, 'Units', 'inches');
+fig1.Position(3:4) = [3.5 2.5]; % Ancho = 3.5 in, alto = 2.5 in
+exportgraphics(fig1, 'exp_sintesis.svg', 'ContentType', 'vector');
 
-% Elegir el extremo más grande
-if abs(dUpos) >= abs(dUneg)
-    Umaxd       = abs(dUpos)  % magnitud del desvío máximo
-    Umax_val    = Upos;       % valor de la señal de control en ese extremo
-    ind_Umaxd   = ind_pos;    % índice del extremo
-else
-    Umaxd       = abs(dUneg)
-    Umax_val    = Uneg;
-    ind_Umaxd   = ind_neg;
-end
+% Especificaciones
+e = r - y;
 
-% Tiempo al error máximo y Emaxd
-e2 = r2 - y2;
-[~, ind_Emaxd] = max(abs(e2));
-Emax_val = e2(ind_Emaxd);   % valor con signo
-Emaxd    = abs(Emax_val)   % magnitud
-t_Emaxd  = t2(ind_Emaxd)   % instante de tiempo
+idx1 = 2 >= 0 & t <= 12; % Perturbación 1
+idx2 = t >= 15 & t <= 25; % Perturbación 2
 
-% Error permanente
-e_permd = r2(length(r2)) - y2_final
+% IAE
+IAE_d1 = trapz(t(idx1), abs(e(idx1)))
+IAE_d2 = trapz(t(idx2), abs(e(idx2)))
 
-% Tiempo de asentamiento al 2%
-ind_98  = find(abs(y2 - 0.98*y2_final) < 0.01, 1, 'last');
-ind_102 = find(abs(y2 - 1.02*y2_final) < 0.01, 1, 'last');
+% Error máximo
+Emax1 = max(abs(e(idx1)))
+Emax2 = max(abs(e(idx2)))
 
-% Selección del índice de asentamiento
-if isempty(ind_98) && isempty(ind_102)
-    ta2 = NaN;                 % no se detectó asentamiento
-elseif isempty(ind_98)
-    ind_ta2 = ind_102;         % solo existe ind_102
-elseif isempty(ind_102)
-    ind_ta2 = ind_98;          % solo existe ind_98
-else
-    ind_ta2 = max(ind_98, ind_102);  % Tomar el último si ambos existen
-end
+% Esfuerzo de control
+TVu1 = sum(abs(diff(u(idx1))))
+TVu2 = sum(abs(diff(u(idx2))))
 
-ta2 = t2(ind_ta2) - 1
+% Señal de control máxima
+Umax1 = abs(max(u(idx1)) - u(116)) % Desde 2 s
+Umax2 = abs(min(u(idx2)) - u(883)) % Desde 15 s
+%%
+%[text] ### Brambilla
+clear;
+clc;
+
+M = readmatrix('exp/3-2_brambilla.csv');
+
+% Extraer datos (25 s)
+t = M(1:1785, 1);
+t = t - t(1);
+r = M(1:1785, 2);
+y = M(1:1785, 3);
+u = M(1:1785, 4);
+
+% Graficar
+fig1 = figure;
+plot(t, y);
+hold on;
+plot(t, u, 'Color', '#800080');
+plot(t, r, 'r')
+hold off;
+grid on;
+xlabel('Tiempo (s)');
+ylabel('Amplitud (%)');
+legend('Salida y(t)', 'Control u(t)', 'Referencia r(t)', 'Location', 'best');
+
+% Exportar svg
+set(fig1, 'Units', 'inches');
+fig1.Position(3:4) = [3.5 2.5]; % Ancho = 3.5 in, alto = 2.5 in
+exportgraphics(fig1, 'exp_brambilla.svg', 'ContentType', 'vector');
+
+% Especificaciones
+e = r - y;
+
+idx1 = t >= 0 & t <= 10; % Perturbación 1
+idx2 = t >= 10 & t <= 20; % Perturbación 2
+
+% IAE
+IAE_d1 = trapz(t(idx1), abs(e(idx1)))
+IAE_d2 = trapz(t(idx2), abs(e(idx2)))
+
+% Error máximo
+Emax1 = max(abs(e(idx1)))
+Emax2 = max(abs(e(idx2)))
+
+% Esfuerzo de control
+TVu1 = sum(abs(diff(u(idx1))))
+TVu2 = sum(abs(diff(u(idx2))))
+
+% Señal de control máxima
+Umax1 = (max(u(idx1)) - u(1))
+Umax2 = abs(min(u(idx2)) - u(732)) % Desde 10 s
 
 %[appendix]{"version":"1.0"}
 %---
