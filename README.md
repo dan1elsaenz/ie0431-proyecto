@@ -2,6 +2,8 @@
 
 En este repositorio, se muestra el trabajo desarrollado para el proyecto del curso **IE0431 - Sistemas de control** correspondiente al diseño de un sistema de control de flujo de aire enfocado en la aplicación para una cabina de bioseguridad.
 
+> Para acceder al informe académico desarrollado, utilice [este enlace](https://dan1elsaenz.github.io/ie0431-proyecto/reporte.pdf).
+
 ## Herramientas de software utilizadas
 
 Para la realización del proyecto, se utilizó:
